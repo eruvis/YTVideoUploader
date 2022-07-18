@@ -1,30 +1,16 @@
-import os
-import time
+import argparse
 
-from selenium import webdriver
+from ytvideouploader import YTVideoUploader
+from typing import Optional
 
-from webdriver.firefox import Firefox
 
-if __name__ == '__main__':
-    # browser = Firefox()
-    # browser.get('https://www.youtube.com/')
-    # # login
-    # browser.get('https://www.youtube.com/upload')
+def run(video_path: str, video_title: Optional[str] = str):
+    assert YTVideoUploader(video_path, video_title).upload_video()
 
-    # options = webdriver.FirefoxOptions()
-    # options.set_preference("marionatte", False)
-    # options.set_preference("dom.webdriver.enabled", False)
-    # options.set_preference("media.peerconnection.enabled", False)
-    # options.set_preference('useAutomationExtension', False)
-    # options.set_preference("general.warnOnAboutConfig", False)
-    # driver = webdriver.Firefox(options=options)
-    # driver.get('https://www.youtube.com/upload')
 
-    # time.sleep(5)
-    # browser.driver.quit()
-    print("HELLO")
-
-# search_box = driver.find_element(By.NAME, 'q')
-search_box.send_keys('ChromeDriver')
-# search_box.submit()
-# time.sleep(5)  # Let the user actually see something!
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--video", required=True)
+    parser.add_argument("--title")
+    args = parser.parse_args()
+    run(args.video, args.title)

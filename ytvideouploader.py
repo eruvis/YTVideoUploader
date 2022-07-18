@@ -8,7 +8,7 @@ from typing import Optional
 from selenium.webdriver.common.by import By
 
 import Constant
-from webdriver.firefox import Firefox
+from firefox import Firefox
 
 
 class YTVideoUploader:
@@ -16,7 +16,7 @@ class YTVideoUploader:
         self.video_path = str(Path.cwd() / video_path)
         self.video_title = video_title
 
-        self.browser = Firefox(full_screen=False)
+        self.browser = Firefox(full_screen=False, headless=True)
 
         self.logger = logging.getLogger(__name__)  # debug
         self.logger.setLevel(logging.DEBUG)  # debug
@@ -63,6 +63,7 @@ class YTVideoUploader:
                 True
             )
             self.logger.debug(f'The video title was set to \"{self.video_title}\"')  # debug
+            self.__sleep()
 
         # kids audience
         not_for_kids_rb = self.browser.find_element(By.NAME, Constant.NOT_MADE_FOR_KIDS_LABEL)

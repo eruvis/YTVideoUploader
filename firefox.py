@@ -52,7 +52,9 @@ class Firefox:
 
         self.__set_options()
 
-        self.driver = webdriver.Firefox(options=self.options)
+        self.driver = webdriver.Firefox(executable_path='webdriver/geckodriver.exe',
+                                        service_log_path='webdriver',
+                                        options=self.options)
 
         if full_screen:
             self.__set_fullscreen()
