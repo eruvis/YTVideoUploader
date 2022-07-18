@@ -12,5 +12,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--video", required=True)
     parser.add_argument("--title")
+    parser.add_argument("--headless", type=bool, default=False)
+    parser.add_argument("--fullscreen", type=bool, default=True)
     args = parser.parse_args()
     run(args.video, args.title)

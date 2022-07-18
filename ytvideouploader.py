@@ -12,11 +12,13 @@ from firefox import Firefox
 
 
 class YTVideoUploader:
-    def __init__(self, video_path: str, video_title: Optional[str] = None):
+    def __init__(self, video_path: str, video_title: Optional[str] = None, fullscreen: bool = True, headless: bool = False):
         self.video_path = str(Path.cwd() / video_path)
         self.video_title = video_title
+        self.headless = headless
+        self.full_screen = fullscreen
 
-        self.browser = Firefox(full_screen=False, headless=True)
+        self.browser = Firefox(fullscreen=fullscreen, headless=headless)
 
         self.logger = logging.getLogger(__name__)  # debug
         self.logger.setLevel(logging.DEBUG)  # debug

@@ -21,7 +21,7 @@ class Firefox:
             self,
             cookies_folder_path: str = COOKIE_PATH,
             language: str = 'ru',
-            full_screen: bool = True,
+            fullscreen: bool = True,
             private: bool = False,
             user_agent: str = None,
             headless: bool = False,
@@ -53,10 +53,10 @@ class Firefox:
         self.__set_options()
 
         self.driver = webdriver.Firefox(executable_path='webdriver/geckodriver.exe',
-                                        service_log_path='webdriver',
+                                        service_log_path='webdriver/geckodriver.log',
                                         options=self.options)
 
-        if full_screen:
+        if fullscreen:
             self.__set_fullscreen()
 
     def get(self, url: str) -> bool:
