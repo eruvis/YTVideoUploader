@@ -12,7 +12,8 @@ from firefox import Firefox
 
 
 class YTVideoUploader:
-    def __init__(self, video_path: str, video_title: Optional[str] = None, fullscreen: bool = True, headless: bool = False):
+    def __init__(self, video_path: str, video_title: Optional[str] = None, headless: bool = False,
+                 fullscreen: bool = False):
         self.video_path = str(Path.cwd() / video_path)
         self.video_title = video_title
         self.headless = headless
@@ -73,15 +74,16 @@ class YTVideoUploader:
             self.browser.find_element(By.ID, 'radioLabel', not_for_kids_rb).click()
             self.logger.debug(f'Selected \"{Constant.NOT_MADE_FOR_KIDS_LABEL}\"')  # debug
 
-        self.browser.find_element(By.ID, Constant.NEXT_BUTTON).click()
-        self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} one')  # debug
-        self.__sleep()
-        self.browser.find_element(By.ID, Constant.NEXT_BUTTON).click()
-        self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} two')  # debug
-        self.__sleep()
-        self.browser.find_element(By.ID, Constant.NEXT_BUTTON).click()
-        self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} three')  # debug
-        self.__sleep()
+        for i in range(3):
+            next_btn = self.browser.find_element(By.ID, Constant.NEXT_BUTTON)
+            while True:
+                if not self.__has_attribute(next_btn, Constant.DISABLED):
+                    next_btn.click()
+                    self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} {i+1}')  # debug
+                    self.__sleep()
+                    break
+                else:
+                    self.__sleep()
 
         # publish video
         save_or_publish_rb = self.browser.find_element(By.NAME, Constant.SAVE_OR_PUBLISH_RADIO_BUTTON)
@@ -130,4 +132,5 @@ class YTVideoUploader:
         return video_id
 
     def __quit(self):
+        self.browser.driver.close()
         self.browser.driver.quit()

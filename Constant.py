@@ -13,6 +13,7 @@ PUBLIC_RADIO_BUTTON = 'PUBLIC'
 RADIO_LABEL = 'radioLabel'
 
 CHECKED = 'checked'
+DISABLED = 'disabled'
 
 MIN_DELAY = 2.000
 MAX_DELAY = 3.500
