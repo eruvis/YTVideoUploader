@@ -1,10 +1,12 @@
 import logging
+import multiprocessing
 import random
 import time
 
 from pathlib import Path
 from typing import Optional
 
+from selenium.common import ElementNotInteractableException
 from selenium.webdriver.common.by import By
 
 import Constant
@@ -12,8 +14,9 @@ from firefox import Firefox
 
 
 class YTVideoUploader:
-    def __init__(self, video_path: str, video_title: Optional[str] = None, headless: bool = False,
+    def __init__(self, task_n, video_path: str, video_title: Optional[str] = None, headless: bool = False,
                  fullscreen: bool = False):
+        self.task_n = str(task_n)
         self.video_path = str(Path.cwd() / video_path)
         self.video_title = video_title
         self.headless = headless
@@ -23,16 +26,33 @@ class YTVideoUploader:
 
         self.logger = logging.getLogger(__name__)  # debug
         self.logger.setLevel(logging.DEBUG)  # debug
-        logging.basicConfig()  # debug
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s [%(levelname)s]'
+                   ' [PROCESS №' + multiprocessing.current_process().name.split('-')[-1] + ']'
+                   ' [TASK №'  + self.task_n + ']: %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+        )  # debug
+
 
     def upload_video(self):
         try:
-            self.__login()
-            return self.__upload()
+            self.logger.info('Task start!')
+            # self.__login()
+            # return self.__upload()
+            return True
+        except ElementNotInteractableException as e:
+            self.logger.error(e.msg)  # debug
+            self.browser.screenshot()
+            return False
         except Exception as e:
-            print(e)
+            self.logger.exception(e.__traceback__)  # debug
+            if self.browser.driver.service.is_connectable():
+                self.browser.screenshot()
+            return False
+        finally:
             self.__quit()
-            raise
+
 
     def __login(self):
         self.browser.get(Constant.YOUTUBE_URL)
@@ -54,17 +74,20 @@ class YTVideoUploader:
         self.__sleep()
 
         # find upload element and upload send video
-        self.browser.find_element(By.XPATH, Constant.FILE_DATA_INPUT).send_keys(self.video_path)
-        self.logger.debug('Attached video {}'.format(self.video_path))  # debug
+        file_data_input = self.browser.find_element(By.XPATH, Constant.FILE_DATA_INPUT)
+        if file_data_input is None:
+            return False
+
+        self.browser.send_keys(file_data_input, self.video_path)
+        self.logger.debug(f'Attached video {self.video_path}')  # debug
         self.__sleep()
 
         # find title input element and write title
         if self.video_title:
-            self.browser.send_keys(
-                self.browser.find_element(By.XPATH, Constant.VIDEO_TITLE_INPUT),
-                self.video_title,
-                True
-            )
+            video_title_input = self.browser.find_element(By.XPATH, Constant.VIDEO_TITLE_INPUT)
+            if video_title_input is None:
+                return False
+            self.browser.send_keys(video_title_input, self.video_title, True)
             self.logger.debug(f'The video title was set to \"{self.video_title}\"')  # debug
             self.__sleep()
 
@@ -79,7 +102,7 @@ class YTVideoUploader:
             while True:
                 if not self.__has_attribute(next_btn, Constant.DISABLED):
                     next_btn.click()
-                    self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} {i+1}')  # debug
+                    self.logger.debug(f'Clicked {Constant.NEXT_BUTTON} {i + 1}')  # debug
                     self.__sleep()
                     break
                 else:
@@ -105,9 +128,7 @@ class YTVideoUploader:
         self.browser.find_element(By.ID, Constant.DONE_BUTTON).click()
         self.logger.debug(f"Published the video with video_id = {video_id}")
         self.__sleep()
-
         self.browser.get(Constant.YOUTUBE_URL)
-        self.__quit()
         return True
 
     def __sleep(self):
@@ -132,5 +153,4 @@ class YTVideoUploader:
         return video_id
 
     def __quit(self):
-        self.browser.driver.close()
         self.browser.driver.quit()

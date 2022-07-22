@@ -17,3 +17,6 @@ DISABLED = 'disabled'
 
 MIN_DELAY = 2.000
 MAX_DELAY = 3.500
+
+WARM_WELCOME_DIALOG = "//*[@id='illustration'][@class='style-scope ytcp-warm-welcome-dialog']"
+DISMISS_BUTTON = "*[@id='dismiss-button']/div"

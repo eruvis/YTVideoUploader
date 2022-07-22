@@ -1,3 +1,4 @@
+import datetime
 import logging
 import pickle
 import os
@@ -8,7 +9,9 @@ import tldextract
 from typing import Optional
 
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver import Keys
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -31,7 +34,6 @@ class Firefox:
         self.cookies_folder_path = cookies_folder_path
         self.options = webdriver.FirefoxOptions()
 
-        logging.basicConfig()
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
 
@@ -52,9 +54,9 @@ class Firefox:
 
         self.__set_options()
 
-        self.driver = webdriver.Firefox(executable_path='webdriver/geckodriver.exe',
-                                        service_log_path='webdriver/geckodriver.log',
-                                        options=self.options)
+        self.service = Service(executable_path='webdriver/geckodriver.exe', log_path='webdriver/geckodriver.log')
+
+        self.driver = webdriver.Firefox(service=self.service, options=self.options)
 
         if fullscreen:
             self.__set_fullscreen()
@@ -77,22 +79,10 @@ class Firefox:
 
     def find_element(self, by: By, key: str, timeout: int = 15) -> Optional:
         try:
-            return WebDriverWait(self.driver, timeout)\
-                .until(EC.presence_of_element_located((by, key)))
-        except Exception as e:
+            return WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((by, key)))
+        except TimeoutException as e:
             self.logger.error(f'Dont find element with key: {key}')
-            self.logger.exception(e.__traceback__)
-            self.driver.quit()
-            return None
-
-    def find_elements(self, by: By, key: str, timeout: int = 15) -> Optional:
-        try:
-            return WebDriverWait(self.driver, timeout)\
-                .until(EC.presence_of_all_elements_located((by, key)))
-        except Exception as e:
-            self.logger.error(f'Dont find elements with key: {key}')
-            self.logger.exception(e.__traceback__)
-            self.driver.quit()
+            self.screenshot()
             return None
 
     def has_cookies_for_current_website(self) -> bool:
@@ -128,6 +118,9 @@ class Firefox:
         except:
             return None
 
+    def screenshot(self):
+        self.driver.get_screenshot_as_file(f"media/" + datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f") + '.png')
+
     def __set_options(self):
         self.options.set_preference("marionette", False)
         self.options.set_preference("dom.webdriver.enabled", False)
@@ -147,18 +140,6 @@ class Firefox:
         self.options.set_preference("browser.privatebrowsing.autostart", True)
 
     def __set_user_agent(self, user_agent):
-        if user_agent == 'random':
-            user_agent_path = os.path.join(self.cookies_folder_path, 'user_agent.txt')
-
-            if os.path.exists(user_agent_path):
-                with open(user_agent_path, 'r') as file:
-                    user_agent = file.read().strip()
-            else:
-                # user_agent = self.__random_firefox_user_agent(min_version=60.0)
-
-                with open(user_agent_path, 'w') as file:
-                    file.write(user_agent)
-
         self.options.set_preference("general.useragent.override", user_agent)
 
     def __set_proxy(self, host, port):
