@@ -38,8 +38,8 @@ class YTVideoUploader:
     def upload_video(self):
         try:
             self.logger.info('Task start!')
-            # self.__login()
-            # return self.__upload()
+            self.__login()
+            return self.__upload()
             return True
         except ElementNotInteractableException as e:
             self.logger.error(e.msg)  # debug
