@@ -34,9 +34,6 @@ class Firefox:
         self.cookies_folder_path = cookies_folder_path
         self.options = webdriver.FirefoxOptions()
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-
         if language:
             self.__set_language(language)
 
@@ -77,11 +74,11 @@ class Firefox:
     def refresh(self) -> None:
         self.driver.refresh()
 
-    def find_element(self, by: By, key: str, timeout: int = 15) -> Optional:
+    def find_element(self, by: By, key: str, timeout: float = 15.0) -> Optional:
         try:
-            return WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((by, key)))
-        except TimeoutException as e:
-            self.logger.error(f'Dont find element with key: {key}')
+            return WebDriverWait(driver=self.driver, timeout=timeout).until(EC.presence_of_element_located((by, key)))
+        except TimeoutException:
+            logging.error(f'Dont find element with key: {key}')
             self.screenshot()
             return None
 

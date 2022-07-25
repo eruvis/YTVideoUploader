@@ -11,9 +11,14 @@ from typing import Optional
 def run(task_n: int, video_path: str, video_title: Optional[str] = str, headless: bool = False, fullscreen: bool = False):
     try:
         assert YTVideoUploader(task_n, video_path, video_title, headless, fullscreen).upload_video()
-        logging.info('Task end. Video uploaded successfully!')  # debug
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        logger.info('Task end. Video uploaded successfully!')  # debug
     except AssertionError:
-        logging.error('Task end. Assertion error: video has not been uploaded!')  # debug
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        logger.error('Task end. Assertion error: video has not been uploaded!')  # debug
+        return
 
 
 def __clear_list_folder():
@@ -59,18 +64,15 @@ if __name__ == "__main__":
         else:
             video_list = __fill_video_list([args.video])
             for i, v in enumerate(video_list, 1):
-                args_list.append((i, str(Path(args.video) / v), args.title+' '+ str(i), args.headless, args.fullscreen))
+                args_list.append((i, str(Path(args.video) / v), args.title, args.headless, args.fullscreen))
     elif os.path.isdir(args.video):
         video_list = __clear_list_folder()
         video_list = __fill_video_list(video_list)
 
         for i, v in enumerate(video_list, 1):
-            args_list.append((i, str(Path(args.video) / v), args.title+' '+ str(i), args.headless, args.fullscreen))
+            args_list.append((i, str(Path(args.video) / v), args.title, args.headless, args.fullscreen))
     else:
         logging.error('Invalid path!')  # debug
-
-    for a in args_list:
-        print(a)
 
     p = Pool(processes=args.threads)
     p.starmap(run, args_list)
