@@ -83,5 +83,6 @@ if __name__ == "__main__":
     parser.add_argument("--video_count", type=int, default=1)
     parser.add_argument("--threads", type=int, default=1)
     args = parser.parse_args()
+
     p = Pool(processes=args.threads)
     p.starmap(run, __create_args_list())

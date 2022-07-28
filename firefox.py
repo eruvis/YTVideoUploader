@@ -116,6 +116,8 @@ class Firefox:
             return None
 
     def screenshot(self):
+        if not os.path.isdir('media'):
+            os.mkdir('media')
         self.driver.get_screenshot_as_file(f"media/" + datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f") + '.png')
 
     def __set_options(self):
