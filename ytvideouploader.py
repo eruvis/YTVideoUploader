@@ -14,11 +14,14 @@ from firefox import Firefox
 
 
 class YTVideoUploader:
-    def __init__(self, task_n, video_path: str, video_title: Optional[str] = None, headless: bool = False,
+    def __init__(self, task_n, video_path: str, video_title: Optional[str] = None,
+                 hide_notify: bool = False,
+                 headless: bool = False,
                  fullscreen: bool = False):
         self.task_n = str(task_n)
         self.video_path = str(Path.cwd() / video_path)
         self.video_title = video_title
+        self.hide_notify = hide_notify
         self.headless = headless
         self.full_screen = fullscreen
         self.__init_logger()
@@ -94,6 +97,19 @@ class YTVideoUploader:
             self.browser.find_element(By.ID, 'radioLabel', not_for_kids_rb).click()
             logging.info(f'Selected \"{Constant.NOT_MADE_FOR_KIDS_LABEL}\"')  # debug
 
+        if self.hide_notify:
+            # advanced options
+            ad_options = self.browser.find_element(By.ID, Constant.TOGGLE_BUTTON)
+            ad_options.click()
+            logging.info(f'Open advanced options')  # debug
+            self.__sleep()
+
+            # hide notify
+            notify_subscribes = self.browser.find_element(By.ID, Constant.NOTIFY_SUBSCRIBERS)
+            notify_subscribes.click()
+            logging.info(f'Selected \"{Constant.NOTIFY_SUBSCRIBERS}\"')  # debug
+
+        # next button
         for i in range(3):
             next_btn = self.browser.find_element(By.ID, Constant.NEXT_BUTTON)
             while True:

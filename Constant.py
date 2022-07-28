@@ -8,6 +8,8 @@ VIDEO_URL_ELEMENT = "//span[@class='video-url-fadeable style-scope ytcp-video-in
 NOT_MADE_FOR_KIDS_LABEL = 'VIDEO_MADE_FOR_KIDS_NOT_MFK'
 NEXT_BUTTON = 'next-button'
 DONE_BUTTON = 'done-button'
+TOGGLE_BUTTON = 'toggle-button'
+NOTIFY_SUBSCRIBERS = 'notify-subscribers'
 SAVE_OR_PUBLISH_RADIO_BUTTON = 'FIRST_CONTAINER'
 PUBLIC_RADIO_BUTTON = 'PUBLIC'
 RADIO_LABEL = 'radioLabel'

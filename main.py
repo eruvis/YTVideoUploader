@@ -8,16 +8,13 @@ from ytvideouploader import YTVideoUploader
 from typing import Optional
 
 
-def run(task_n: int, video_path: str, video_title: Optional[str] = str, headless: bool = False, fullscreen: bool = False):
+def run(task_n: int, video_path: str, video_title: Optional[str] = str,
+        hide_notify: bool = False, headless: bool = False, fullscreen: bool = False):
     try:
-        assert YTVideoUploader(task_n, video_path, video_title, headless, fullscreen).upload_video()
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        logger.info('Task end. Video uploaded successfully!')  # debug
+        assert YTVideoUploader(task_n, video_path, video_title, hide_notify, headless, fullscreen).upload_video()
+        logging.info('Task end. Video uploaded successfully!')  # debug
     except AssertionError:
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        logger.error('Task end. Assertion error: video has not been uploaded!')  # debug
+        logging.error('Task end. Assertion error: video has not been uploaded!')  # debug
         return
 
 
@@ -47,32 +44,44 @@ def __fill_video_list(vl):
     return vl
 
 
+def __create_args_list():
+    args_list = []
+
+    if os.path.isfile(args.video):
+        for i, v in enumerate(range(args.video_count), 1):
+            args_list.append((i,
+                              args.video,
+                              args.title,
+                              args.hide_notify,
+                              args.headless,
+                              args.fullscreen))
+
+    elif os.path.isdir(args.video):
+        video_list = __clear_list_folder()
+        video_list = __fill_video_list(video_list)
+
+        for i, video in enumerate(video_list, 1):
+            args_list.append((i,
+                              str(Path(args.video) / video),
+                              args.title,
+                              args.hide_notify,
+                              args.headless,
+                              args.fullscreen))
+    else:
+        logging.error('Invalid path!')  # debug
+
+    return args_list
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--video", required=True)
     parser.add_argument("--title")
+    parser.add_argument("--hide_notify", action='store_true', default=False)
     parser.add_argument("--headless", action='store_true', default=False)
     parser.add_argument("--fullscreen", action='store_true', default=False)
     parser.add_argument("--video_count", type=int, default=1)
     parser.add_argument("--threads", type=int, default=1)
     args = parser.parse_args()
-
-    args_list = []
-    if os.path.isfile(args.video):
-        if args.video_count == 1:
-            args_list.append((1, args.video, args.title, args.headless, args.fullscreen))
-        else:
-            video_list = __fill_video_list([args.video])
-            for i, v in enumerate(video_list, 1):
-                args_list.append((i, str(Path(args.video) / v), args.title, args.headless, args.fullscreen))
-    elif os.path.isdir(args.video):
-        video_list = __clear_list_folder()
-        video_list = __fill_video_list(video_list)
-
-        for i, v in enumerate(video_list, 1):
-            args_list.append((i, str(Path(args.video) / v), args.title, args.headless, args.fullscreen))
-    else:
-        logging.error('Invalid path!')  # debug
-
     p = Pool(processes=args.threads)
-    p.starmap(run, args_list)
+    p.starmap(run, __create_args_list())
