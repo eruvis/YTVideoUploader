@@ -59,10 +59,8 @@ class Firefox:
             self.__set_fullscreen()
 
     def get(self, url: str) -> bool:
-        clean_current = self.driver.current_url \
-            .replace('https://', '').replace('http://', '').replace('www.', '').strip('/')
-        clean_new = url \
-            .replace('https://', '').replace('http://', '').replace('www.', '').strip('/')
+        clean_current = self.driver.current_url.replace('https://', '').replace('http://', '').replace('www.', '').strip('/')
+        clean_new = url.replace('https://', '').replace('http://', '').replace('www.', '').strip('/')
 
         if clean_current == clean_new:
             return False

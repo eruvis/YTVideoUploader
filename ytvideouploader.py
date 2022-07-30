@@ -46,10 +46,12 @@ class YTVideoUploader:
             self.__quit()
 
     def __init_logger(self):
+        n_process = multiprocessing.current_process().name.split('-')[-1]
+        if n_process == 'MainProcess':
+            n_process = 1
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s [%(levelname)s] [PROCESS №' + multiprocessing.current_process().name.split('-')[
-                -1] + '] [TASK №' + self.task_n + ']: %(message)s',
+            format='%(asctime)s [%(levelname)s] [PROCESS №' + str(n_process) + '] [TASK №' + self.task_n + ']: %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
             force=True
         )  # debug
