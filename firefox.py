@@ -53,7 +53,14 @@ class Firefox:
 
         self.service = Service(executable_path='webdriver/geckodriver.exe', log_path='webdriver/geckodriver.log')
 
-        self.driver = webdriver.Firefox(service=self.service, options=self.options)
+        firefoxProfile = webdriver.FirefoxProfile()
+        firefoxProfile.set_preference('permissions.default.stylesheet', 2)
+        firefoxProfile.set_preference('permissions.default.image', 2)
+        firefoxProfile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so','false')
+        firefoxProfile.set_preference("http.response.timeout", 20)
+        firefoxProfile.set_preference("dom.max_script_run_time", 20)
+
+        self.driver = webdriver.Firefox(service=self.service, firefox_profile=firefoxProfile, options=self.options)
 
         if fullscreen:
             self.__set_fullscreen()
@@ -72,9 +79,11 @@ class Firefox:
     def refresh(self) -> None:
         self.driver.refresh()
 
-    def find_element(self, by: By, key: str, timeout: float = 15.0) -> Optional:
+    def find_element(self, by: By, key: str, element: Optional = None, timeout: float = 15.0) -> Optional:
+        if element is None:
+            element = self.driver
         try:
-            return WebDriverWait(driver=self.driver, timeout=timeout).until(EC.presence_of_element_located((by, key)))
+            return WebDriverWait(driver=element, timeout=timeout).until(EC.presence_of_element_located((by, key)))
         except TimeoutException:
             logging.error(f'Dont find element with key: {key}')
             self.screenshot()

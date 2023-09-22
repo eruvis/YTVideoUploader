@@ -61,6 +61,7 @@ def __create_args_list():
         video_list = __fill_video_list(video_list)
 
         for i, video in enumerate(video_list, 1):
+            print(str(Path(args.video) / video))
             args_list.append((i,
                               str(Path(args.video) / video),
                               args.title,
